@@ -36,9 +36,10 @@ def transform_data(list_id, data):
 
 
 class IntermediateController:
-    def __init__(self, mc_key, om_key, list_id, last_successfull=0):
+    def __init__(self, mc_key, om_key, list_id, last_successfull=None):
         self.mc_api_key = mc_key
         self.om_api_key = om_key
+        # Get the mailchimp DC from the API key
         self.mc_dc = mc_key.split("-")[-1]  # A bit hacky but will do for now.
         self.list_id = list_id
         self.last_successfull = last_successfull  # Query from a given date
@@ -46,13 +47,17 @@ class IntermediateController:
     @mc_failures.count_exceptions()
     def query_mailchimp(self, from_time=""):
         print("Querying mailchimp")
-        if from_time == "":
+        if (from_time == "") and self.last_successfull:
             from_time = self.last_successfull.isoformat()
         # Do a simple time based query on mailchimp to sync with
         url = MAIL_CHIMP_URL.format(dc=self.mc_dc, list_id=self.list_id)
         auth = HTTPBasicAuth('bananas-are-cool', self.mc_api_key)
-        params = {'since_last_changed': from_time}
+        params = None
+        if from_time != "":
+            params = {'since_last_changed': from_time}
         resp = requests.get(url, auth=auth, params=params)
+        if not resp.ok:
+            print(resp.reason)
         resp.raise_for_status()
         return json.loads(resp.text)
 
@@ -69,10 +74,10 @@ class IntermediateController:
 
     def run(self):
         data = self.query_mailchimp()
-        if data is None:
+        data = transform_data(self.list_id, data)
+        if len(data) == 0:
             print("No data found")
             return
-        data = transform_data(self.list_id, data)
         self.update_ometria(json.dumps(data))
 
 
