@@ -1,11 +1,12 @@
 import json
 import os
 import requests
-import datetime
 
+from datetime import datetime
 from prometheus_client import start_http_server, Counter
 from requests.auth import HTTPBasicAuth
 from twisted.internet import reactor, task
+from twisted.python import log
 
 MAILCHIMP_API_KEY_ENV = 'MAILCHIMP_API_KEY'
 OMETRIA_API_KEY_ENV = 'OMETRIA_API_KEY'
@@ -24,10 +25,10 @@ OMETRIA_API_URL = " http://ec2-34-242-147-110.eu-west-1.compute.amazonaws.com:80
 def transform_data(list_id, data):
     output = []
     if 'members' not in data:
-        # TODO: raise exception, malformed data or something equally bad...
-        return
+        # TODO: raise exception, malformed data or something...
+        return output
     for member in data['members']:
-        record = {"id": list_id,
+        record = {"id": list_id,  # Wasn't sure if this was the correct ID
                   "firstname": member['merge_fields']['FNAME'],
                   "lastname": member['merge_fields']['LNAME'],
                   "email": member['email_address']}
@@ -70,7 +71,7 @@ class IntermediateController:
         print(resp.text)
         resp.raise_for_status()
         # Update from time since successfull
-        self.last_successfull = datetime.datetime.now()
+        self.last_successfull = datetime.now()
 
     def run(self):
         data = self.query_mailchimp()
@@ -99,6 +100,7 @@ if __name__ == '__main__':
     # Create new controller and run sync every N seconds
     i = IntermediateController(mailchimp_api_key, ometria_api_key, list_id)
     # Loop forever
+    # Could start multiple of these hand have twisted run them at arbitatry times
     loop = task.LoopingCall(i.run)
-    loop.start(DEFAULT_SYNC_TIME)
+    loop.start(DEFAULT_SYNC_TIME).addErrback(log.err)
     reactor.run()
