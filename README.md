@@ -24,22 +24,26 @@ I did consider allowing multiple imports in the same script, however this added 
 This project could quite happily live inside a ec2 nano instance. But would be most suited to run inside a container. You could then create a new container for each importer.
 
 
-## Installation
+## Getting started
 
-Basic instructions:
+* Create a .env file with the following environment variables
 
-1. `pip install requirements.txt`
-2. `export MAILCHIMP_API_KEY=[API-KEY] OMETRIA_API_KEY=[API-KEY] MAILCHIMP_LIST_ID=[LIST-ID]`
-3. `python ./ingester.py`
+```
+MAILCHIMP_API_KEY=<your key>
+OMETRIA_API_KEY=<your key>
+MAILCHIMP_LIST_ID=<list id>
+```
+
+* Build the Docker image using `docker-compose build`
 
 
-Using docker:
+## Running Ingest
 
-1. `docker build -t python-ingester .`
-2. `docker run -t \
-    -e MAILCHIMP_API_KEY="KEY-HERE" \
-    -e OMETRIA_API_KEY="KEY-HERE \
-    -e MAILCHIMP_LIST_ID="LIST-HERE" \
-    -p 8888:8888 \
-    python-ingester`
+* `docker-compose up`
+* Browse to localhost:8888 to see Prometheus error reports
+
+
+## Running Tests
+
+* `docker-compose run ingest python -m ingest.tests`
 

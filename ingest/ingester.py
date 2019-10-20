@@ -71,11 +71,10 @@ class MailchimpAPIImporter:
                 }
             except KeyError as e:
                 # Skip this record, it is malformed
-                logger.warning(e)
+                logger.warning(f'Key missing from response: {e}')
             else:
                 output.append(record)
-        # Format to JSON string to send to Ometria API
-        return json.dumps(output)
+        return output
 
     @om_failures.count_exceptions()
     def update_ometria(self, data: str):
@@ -95,4 +94,6 @@ class MailchimpAPIImporter:
             logger.info("No new data available from MailChimp")
             return
 
-        self.update_ometria(self.transform_data(data))
+        # Format to JSON string to send to Ometria API
+        json_data = json.dumps(self.transform_data(data))
+        self.update_ometria(json_data)
