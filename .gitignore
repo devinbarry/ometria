@@ -1,0 +1,9 @@
+# Ignore PyCharm files
+.idea/
+
+# Compiled python code
+*.pyc
+__pycache__/
+
+# Ignore environment file
+.env

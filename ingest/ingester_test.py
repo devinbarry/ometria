@@ -1,5 +1,5 @@
 import unittest
-import ingester
+from ingest import ingester
 
 sample_input = {"members": [
                 {"merge_fields": {"FNAME": "Tom", "LNAME": "Vass"},

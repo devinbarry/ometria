@@ -1,6 +1,12 @@
-FROM python:3
+FROM python:3.7
 
-ADD ingester.py /
-ADD requirements.txt /
+ENV PYTHONUNBUFFERED 1
+
+# Requirements have to be pulled and installed here, otherwise caching won't work
+COPY ./requirements.txt /requirements.txt
+
+# Upgrade to the latest pip
+RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
-CMD [ "python", "./ingester.py" ]
+
+WORKDIR /app

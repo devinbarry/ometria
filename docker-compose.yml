@@ -1,0 +1,13 @@
+---
+
+version: '3.7'
+services:
+  ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    command: python -m ingest.main
