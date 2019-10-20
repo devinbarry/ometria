@@ -13,7 +13,7 @@ from .config import MAIL_CHIMP_URL, OMETRIA_API_URL
 logger = logging.getLogger(__name__)
 
 
-# Catch and report errors in a usuable fashion.
+# Catch and report errors in a usable fashion.
 mc_failures = Counter('mailchimp_failures_total', 'Number of mailchimp request failures')
 om_failures = Counter('ometria_failures_total', 'Number of ometria request failures')
 
@@ -60,7 +60,7 @@ class MailchimpAPIImporter:
             raise MailchimpAPIImporterException(f"Invalid response from Mailchimp: {data}")
 
         for member in data['members']:
-            print(member)
+            logger.debug(member)
             try:
                 record = {
                     "id": member['unique_email_id'],
@@ -83,17 +83,21 @@ class MailchimpAPIImporter:
         resp = requests.post(OMETRIA_API_URL, data=data, headers=headers)
         logger.info(resp.text)
         resp.raise_for_status()
-        # Update from time since successful
-        self.last_successful = datetime.now()
+        return resp.json()
 
     def run(self):
         logger.info(f"Querying mailchimp: {self.mc_url}")
-        data = self.query_mailchimp()
+        response = self.query_mailchimp()
+        contacts = self.transform_data(response)
 
-        if len(data) == 0:
+        if len(contacts) == 0:
             logger.info("No new data available from MailChimp")
             return
 
         # Format to JSON string to send to Ometria API
-        json_data = json.dumps(self.transform_data(data))
-        self.update_ometria(json_data)
+        response = self.update_ometria(json.dumps(contacts))
+        if "content" in response and response["content"] == len(contacts):
+            # Update from time since successful
+            self.last_successful = datetime.now()
+        else:
+            raise MailchimpAPIImporterException(f"Unable to save all contacts to Ometria!")

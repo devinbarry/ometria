@@ -7,7 +7,7 @@ MAIL_LIST_ID_ENV = "MAILCHIMP_LIST_ID"
 MAILCHIMP_API_KEY = os.environ.get(MAILCHIMP_API_KEY_ENV)
 OMETRIA_API_KEY = os.environ.get(OMETRIA_API_KEY_ENV)
 MAIL_LIST_ID = os.environ.get(MAIL_LIST_ID_ENV)
-DEFAULT_SYNC_TIME = 60 * 60  # Sync every hour
+DEFAULT_SYNC_TIME = 60 * 60  # seconds
 
 # Get the mailchimp DC from the API key
 assert "-" in MAILCHIMP_API_KEY
