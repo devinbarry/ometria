@@ -2,7 +2,7 @@
 
 ## Credits
 
-Based on work by [Tom Vass](mr.tom.vass@gmail.com).
+Based on work by [Tom Vass](mailto:mr.tom.vass@gmail.com).
 The original repo available [here](https://github.com/Tomvass/Ometria).
 
 ## Description
